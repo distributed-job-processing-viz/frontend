@@ -1,0 +1,721 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Distributed Task Visualization API",
+    "description": "REST API for visualizing and managing distributed task execution across multiple nodes",
+    "contact": {
+      "name": "Jordi Coll",
+      "email": "contact@jjcoll.dev"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Generated server url"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Task Management",
+      "description": "APIs for managing tasks in the distributed task processing system"
+    },
+    {
+      "name": "Engine Control",
+      "description": "APIs for controlling the task processing engine"
+    },
+    {
+      "name": "Health",
+      "description": "Health check endpoints"
+    },
+    {
+      "name": "Worker Management",
+      "description": "APIs for managing worker instances in the distributed system"
+    }
+  ],
+  "paths": {
+    "/api/workers": {
+      "get": {
+        "tags": ["Worker Management"],
+        "summary": "Get all workers",
+        "description": "Retrieves a list of all worker instances in the system",
+        "operationId": "getAllWorkers",
+        "responses": {
+          "200": {
+            "description": "List of workers retrieved successfully",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkerResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Worker Management"],
+        "summary": "Create a new worker",
+        "description": "Creates a new worker instance. If name is not provided, it will be auto-generated (e.g., 'worker-1', 'worker-2')",
+        "operationId": "createWorker",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkerCreateRequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Worker created successfully",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkerResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tasks": {
+      "get": {
+        "tags": ["Task Management"],
+        "summary": "Get all tasks",
+        "description": "Retrieves a paginated list of tasks with optional filtering by status and complexity. Results are sorted by creation date in descending order by default.",
+        "operationId": "getAllTasks",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter tasks by status (e.g., PENDING, RUNNING, COMPLETED)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["PENDING", "PROCESSING", "COMPLETED", "FAILED"]
+            }
+          },
+          {
+            "name": "complexity",
+            "in": "query",
+            "description": "Filter tasks by complexity level (e.g., LOW, MEDIUM, HIGH)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["LOW", "MEDIUM", "HIGH"]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "The size of the page to be returned",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "default": ["createdAt,DESC"],
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of tasks retrieved successfully",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Task Management"],
+        "summary": "Submit a new task",
+        "description": "Submits a new task to the distributed task processing system for execution",
+        "operationId": "submitTask",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskSubmissionRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Task submitted successfully",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid task request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/engine/stop": {
+      "post": {
+        "tags": ["Engine Control"],
+        "summary": "Stop the processing engine",
+        "description": "Gracefully stops all active workers. In-flight tasks will be marked as FAILED",
+        "operationId": "stopEngine",
+        "responses": {
+          "200": {
+            "description": "Engine stopped successfully",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EngineStatusResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Engine is already stopped",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EngineStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/engine/start": {
+      "post": {
+        "tags": ["Engine Control"],
+        "summary": "Start the processing engine",
+        "description": "Activates all pending workers to begin processing tasks",
+        "operationId": "startEngine",
+        "responses": {
+          "200": {
+            "description": "Engine started successfully",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EngineStatusResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Engine is already running",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EngineStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/workers/{id}": {
+      "get": {
+        "tags": ["Worker Management"],
+        "summary": "Get a worker by ID",
+        "description": "Retrieves details of a specific worker by its ID",
+        "operationId": "getWorker",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the worker to retrieve",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Worker found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkerResponseDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Worker not found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkerResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Worker Management"],
+        "summary": "Stop a worker",
+        "description": "Stops a worker by setting its status to STOPPED",
+        "operationId": "stopWorker",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the worker to stop",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Worker stopped successfully",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkerResponseDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Worker not found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkerResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tasks/{id}": {
+      "get": {
+        "tags": ["Task Management"],
+        "summary": "Get a task by ID",
+        "description": "Retrieves details of a specific task by its ID",
+        "operationId": "getTask",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the task to retrieve",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponseDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task not found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "check API health",
+        "description": "Returns the health status of the API",
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/engine/status": {
+      "get": {
+        "tags": ["Engine Control"],
+        "summary": "Get engine status",
+        "description": "Returns current engine state and active worker count",
+        "operationId": "getEngineStatus",
+        "responses": {
+          "200": {
+            "description": "Engine status retrieved successfully",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EngineStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "WorkerCreateRequestDTO": {
+        "type": "object",
+        "description": "Optional worker creation request. If name is not provided, a name will be auto-generated",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Optional name of the worker. If not provided, will be auto-generated",
+            "example": "worker-1"
+          }
+        }
+      },
+      "WorkerResponseDTO": {
+        "type": "object",
+        "description": "Response object containing worker information",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unique identifier of the worker",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the worker",
+            "example": "worker-1"
+          },
+          "status": {
+            "type": "string",
+            "description": "Current status of the worker",
+            "enum": ["IDLE", "PROCESSING", "STOPPED"],
+            "example": "IDLE"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the worker was created",
+            "example": "2025-12-04T14:30:00"
+          },
+          "lastHeartbeat": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of the last heartbeat from the worker",
+            "example": "2025-12-04T14:35:00"
+          }
+        }
+      },
+      "TaskSubmissionRequestDTO": {
+        "type": "object",
+        "description": "Task submission request containing task details",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name/description of the task to create",
+            "example": "Process user data",
+            "minLength": 1
+          },
+          "complexity": {
+            "type": "string",
+            "description": "Complexity of the task, implicitly related to time task takes to complete",
+            "enum": ["LOW", "MEDIUM", "HIGH"],
+            "example": "HIGH"
+          }
+        },
+        "required": ["complexity", "name"]
+      },
+      "Task": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["PENDING", "PROCESSING", "COMPLETED", "FAILED"]
+          },
+          "complexity": {
+            "type": "string",
+            "enum": ["LOW", "MEDIUM", "HIGH"]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "assignedWorker": {
+            "$ref": "#/components/schemas/Worker"
+          },
+          "processingStartedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Worker": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["IDLE", "PROCESSING", "STOPPED"]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastHeartbeat": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "EngineStatusResponse": {
+        "type": "object",
+        "description": "Task processing engine status information",
+        "properties": {
+          "state": {
+            "type": "string",
+            "description": "Current engine state",
+            "enum": ["STOPPED", "RUNNING"],
+            "example": "RUNNING"
+          },
+          "message": {
+            "type": "string",
+            "description": "Status message",
+            "example": "Engine started successfully"
+          },
+          "activeWorkerCount": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of active workers currently processing tasks",
+            "example": 5
+          }
+        }
+      },
+      "Page": {
+        "type": "object",
+        "properties": {
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {}
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PageableObject": {
+        "type": "object",
+        "properties": {
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "paged": {
+            "type": "boolean"
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unpaged": {
+            "type": "boolean"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SortObject": {
+        "type": "object",
+        "properties": {
+          "sorted": {
+            "type": "boolean"
+          },
+          "unsorted": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TaskResponseDTO": {
+        "type": "object",
+        "description": "Response object containing task information",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unique identifier of the task",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "Name/description of the task",
+            "example": "Process user data"
+          },
+          "complexity": {
+            "type": "string",
+            "description": "Complexity of the task, implicitly related to time task takes to complete",
+            "enum": ["LOW", "MEDIUM", "HIGH"],
+            "example": "HIGH"
+          },
+          "status": {
+            "type": "string",
+            "description": "Current status of the task",
+            "enum": ["PENDING", "PROCESSING", "COMPLETED", "FAILED"],
+            "example": "PENDING"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the task was created",
+            "example": "2025-10-08T14:30:00"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the task was completed (null if not completed)",
+            "example": "2025-10-08T14:35:00"
+          },
+          "assignedWorkerId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the worker assigned to process this task (null if not assigned)",
+            "example": 1
+          },
+          "assignedWorkerName": {
+            "type": "string",
+            "description": "Name of the worker assigned to process this task (null if not assigned)",
+            "example": "worker-1"
+          },
+          "processingStartedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when processing started (null if not started)",
+            "example": "2025-10-08T14:30:30"
+          }
+        }
+      }
+    }
+  }
+}
