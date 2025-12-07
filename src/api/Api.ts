@@ -98,7 +98,7 @@ export interface EngineStatusResponse {
    * Current engine state
    * @example "RUNNING"
    */
-  state?: "STOPPED" | "RUNNING";
+  state?: "STOPPED" | "PAUSED" | "RUNNING";
   /**
    * Status message
    * @example "Engine started successfully"
@@ -117,12 +117,12 @@ export interface Page {
   totalElements?: number;
   /** @format int32 */
   totalPages?: number;
-  sort?: SortObject;
-  pageable?: PageableObject;
-  /** @format int32 */
-  numberOfElements?: number;
   first?: boolean;
   last?: boolean;
+  /** @format int32 */
+  numberOfElements?: number;
+  sort?: SortObject;
+  pageable?: PageableObject;
   /** @format int32 */
   size?: number;
   content?: any[];
@@ -201,6 +201,32 @@ export interface TaskResponseDTO {
    * @example "2025-10-08T14:30:30"
    */
   processingStartedAt?: string;
+}
+
+/** Database clear operation response */
+export interface DatabaseClearResponse {
+  /**
+   * Whether the operation was successful
+   * @example true
+   */
+  success?: boolean;
+  /**
+   * Status message
+   * @example "Database cleared successfully"
+   */
+  message?: string;
+  /**
+   * Number of tasks deleted
+   * @format int64
+   * @example 42
+   */
+  tasksDeleted?: number;
+  /**
+   * Number of workers deleted
+   * @format int64
+   * @example 5
+   */
+  workersDeleted?: number;
 }
 
 import type {
@@ -513,6 +539,36 @@ export class Api<
       }),
 
     /**
+     * @description Resumes workers from paused state to continue processing tasks
+     *
+     * @tags Engine Control
+     * @name ResumeEngine
+     * @summary Resume the processing engine
+     * @request POST:/api/engine/resume
+     */
+    resumeEngine: (params: RequestParams = {}) =>
+      this.request<EngineStatusResponse, EngineStatusResponse>({
+        path: `/api/engine/resume`,
+        method: "POST",
+        ...params,
+      }),
+
+    /**
+     * @description Pauses all workers. Threads remain alive but idle. Tasks not processed.
+     *
+     * @tags Engine Control
+     * @name PauseEngine
+     * @summary Pause the processing engine
+     * @request POST:/api/engine/pause
+     */
+    pauseEngine: (params: RequestParams = {}) =>
+      this.request<EngineStatusResponse, EngineStatusResponse>({
+        path: `/api/engine/pause`,
+        method: "POST",
+        ...params,
+      }),
+
+    /**
      * @description Retrieves details of a specific worker by its ID
      *
      * @tags Worker Management
@@ -584,6 +640,21 @@ export class Api<
       this.request<EngineStatusResponse, any>({
         path: `/api/engine/status`,
         method: "GET",
+        ...params,
+      }),
+
+    /**
+     * @description Removes all tasks and workers from the database. Can only be called when simulation is stopped.
+     *
+     * @tags Database Management
+     * @name ClearDatabase
+     * @summary Clear all database data
+     * @request DELETE:/api/database/clear
+     */
+    clearDatabase: (params: RequestParams = {}) =>
+      this.request<DatabaseClearResponse, DatabaseClearResponse>({
+        path: `/api/database/clear`,
+        method: "DELETE",
         ...params,
       }),
   };
