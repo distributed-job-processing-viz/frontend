@@ -46,7 +46,7 @@ function DashboardPage() {
     <div className="h-screen flex flex-col bg-background">
       {/* Header */}
       <header className="border-b bg-background z-10 shrink-0">
-        <div className={`px-6 py-3 transition-all duration-300 ${sidebarOpen ? 'mr-96' : ''}`}>
+        <div className={`px-3 md:px-6 py-3 transition-all duration-300 ${sidebarOpen ? 'md:mr-96' : ''}`}>
           <div className="flex items-center justify-between">
             {/* Left: Home Button */}
             <Button
@@ -56,10 +56,11 @@ function DashboardPage() {
               className="gap-2"
             >
               <Home className="h-4 w-4" />
+              <span className="hidden sm:inline">Home</span>
             </Button>
 
             {/* Right: Engine Controls & Sidebar Toggle */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
               <EngineStatusPopover />
               <EngineControls />
               <ThemeToggle />
@@ -101,8 +102,8 @@ function DashboardPage() {
       <div className="flex-1 flex overflow-hidden">
         {/* Kanban Board */}
         <main
-          className={`flex-1 p-6 transition-all duration-300 ${
-            sidebarOpen ? 'mr-96' : ''
+          className={`flex-1 p-2 sm:p-4 md:p-6 transition-all duration-300 ${
+            sidebarOpen ? 'md:mr-96' : ''
           }`}
         >
           <KanbanBoard groupedTasks={groupedTasks} isLoading={isLoading} />

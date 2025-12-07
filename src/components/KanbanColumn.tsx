@@ -23,22 +23,19 @@ export function KanbanColumn({
   isLoading = false,
 }: KanbanColumnProps) {
   return (
-    <div className="h-full border-r last:border-r-0 flex flex-col">
+    <div className="border-r last:border-r-0 sm:odd:border-r-0 lg:odd:border-r border-b sm:even:border-b-0 sm:last:border-b-0 lg:border-b-0 flex flex-col lg:h-full">
       {/* Column Header - Fixed */}
-      <div className="p-4 border-b bg-muted/30 shrink-0">
+      <div className="p-3 md:p-4 border-b bg-muted/30 shrink-0 sticky top-0 lg:static z-10">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold">{title}</h3>
-          <Badge variant="outline" className="font-mono">
+          <Badge variant="outline" className="font-mono text-xs">
             {count}
           </Badge>
         </div>
       </div>
 
-      {/* Tasks Container - Scrollable */}
-      <div
-        className="overflow-y-auto p-3 space-y-2"
-        style={{ height: "calc(100vh - 184px)" }}
-      >
+      {/* Tasks Container - Scrollable on desktop, auto-height on mobile/tablet */}
+      <div className="p-2 md:p-3 space-y-2 lg:overflow-y-auto lg:flex-1">
         {isLoading ? (
           // Loading state - show skeleton cards
           <>
@@ -49,8 +46,8 @@ export function KanbanColumn({
         ) : tasks.length === 0 ? (
           // Empty state
           <Card className="border-dashed">
-            <CardContent className="flex items-center justify-center h-32">
-              <p className="text-sm text-muted-foreground">
+            <CardContent className="flex items-center justify-center h-24 md:h-32">
+              <p className="text-xs md:text-sm text-muted-foreground">
                 No {title.toLowerCase()} tasks
               </p>
             </CardContent>

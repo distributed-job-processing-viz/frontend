@@ -63,7 +63,7 @@ export function EngineControls() {
 
   return (
     <>
-      <div className="flex gap-2">
+      <div className="flex gap-1 sm:gap-2">
         {isRunning ? (
           <>
             <Button
@@ -76,8 +76,8 @@ export function EngineControls() {
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <>
-                  <Pause className="mr-2 h-4 w-4" />
-                  Pause
+                  <Pause className="h-4 w-4" />
+                  <span className="hidden sm:inline sm:ml-2">Pause</span>
                 </>
               )}
             </Button>
@@ -91,8 +91,8 @@ export function EngineControls() {
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <>
-                  <Square className="mr-2 h-4 w-4" />
-                  Stop
+                  <Square className="h-4 w-4" />
+                  <span className="hidden sm:inline sm:ml-2">Stop</span>
                 </>
               )}
             </Button>
@@ -108,8 +108,8 @@ export function EngineControls() {
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <>
-                <Play className="mr-2 h-4 w-4" />
-                {isPaused ? "Resume" : "Start"}
+                <Play className="h-4 w-4" />
+                <span className="hidden sm:inline sm:ml-2">{isPaused ? "Resume" : "Start"}</span>
               </>
             )}
           </Button>

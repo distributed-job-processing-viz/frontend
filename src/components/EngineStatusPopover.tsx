@@ -32,13 +32,13 @@ export function EngineStatusPopover() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button variant="outline" size="sm" className="gap-1 sm:gap-2">
           <Circle className={`h-2 w-2 fill-current ${getStatusColor()}`} />
           <Activity className="h-4 w-4" />
-          Engine
+          <span className="hidden sm:inline">Engine</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-64">
+      <PopoverContent className="w-56 sm:w-64">
         <div className="space-y-3">
           <h4 className="font-semibold text-sm">Engine Status</h4>
 
@@ -47,20 +47,20 @@ export function EngineStatusPopover() {
           ) : (
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">State:</span>
-                <Badge variant={getStatusVariant()}>
+                <span className="text-xs sm:text-sm text-muted-foreground">State:</span>
+                <Badge variant={getStatusVariant()} className="text-xs">
                   {status?.state || 'UNKNOWN'}
                 </Badge>
               </div>
 
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Active Workers:</span>
-                <span className="font-semibold">{status?.activeWorkerCount || 0}</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">Active Workers:</span>
+                <span className="font-semibold text-sm">{status?.activeWorkerCount || 0}</span>
               </div>
 
               {status?.message && (
                 <div className="pt-2 border-t">
-                  <p className="text-xs text-muted-foreground">{status.message}</p>
+                  <p className="text-xs text-muted-foreground break-words">{status.message}</p>
                 </div>
               )}
             </div>
