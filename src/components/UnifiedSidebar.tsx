@@ -50,7 +50,7 @@ export function UnifiedSidebar({
         </TabsList>
 
         <TabsContent value="tasks" className="flex-1 overflow-y-auto p-4 mt-0">
-          <TaskSubmissionForm onSuccess={onClose} />
+          <TaskSubmissionForm />
         </TabsContent>
 
         <TabsContent value="workers" className="flex-1 overflow-y-auto p-4 mt-0">

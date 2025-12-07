@@ -1,4 +1,4 @@
-import { useApi } from '../contexts/ApiContext';
+import { useApi } from './useApi';
 
 /**
  * Custom hook providing access to the API service layer.
