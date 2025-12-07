@@ -10,11 +10,14 @@ interface ApiProviderProps {
 
 export const ApiProvider: React.FC<ApiProviderProps> = ({
   children,
-  baseURL = 'http://localhost:8080'
+  baseURL = import.meta.env.VITE_API || 'http://localhost:8080'
 }) => {
   const api = useMemo(() => {
+    // Add https:// protocol if VITE_API is set but doesn't include protocol
+    const apiUrl = baseURL.startsWith('http') ? baseURL : `https://${baseURL}`;
+
     return new Api({
-      baseURL,
+      baseURL: apiUrl,
       headers: {
         'Content-Type': 'application/json',
       },
