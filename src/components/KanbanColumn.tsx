@@ -23,7 +23,7 @@ export function KanbanColumn({
   isLoading = false,
 }: KanbanColumnProps) {
   return (
-    <div className="border-r last:border-r-0 sm:odd:border-r-0 lg:odd:border-r border-b sm:even:border-b-0 sm:last:border-b-0 lg:border-b-0 flex flex-col lg:h-full">
+    <div className="border-r last:border-r-0 sm:odd:border-r-0 lg:odd:border-r border-b sm:even:border-b-0 sm:last:border-b-0 lg:border-b-0 flex flex-col lg:h-full lg:min-h-0">
       {/* Column Header - Fixed */}
       <div className="p-3 md:p-4 border-b bg-muted/30 shrink-0 sticky top-0 lg:static z-10">
         <div className="flex items-center justify-between">
@@ -35,7 +35,7 @@ export function KanbanColumn({
       </div>
 
       {/* Tasks Container - Scrollable on desktop, auto-height on mobile/tablet */}
-      <div className="p-2 md:p-3 space-y-2 lg:overflow-y-auto lg:flex-1">
+      <div className="p-2 md:p-3 space-y-2 lg:overflow-y-auto lg:flex-1 lg:min-h-0">
         {isLoading ? (
           // Loading state - show skeleton cards
           <>
