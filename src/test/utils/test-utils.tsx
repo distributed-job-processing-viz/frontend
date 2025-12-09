@@ -1,5 +1,5 @@
-import { ReactElement } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
+import { type ReactElement } from 'react';
+import { render, type RenderOptions } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ApiContext } from '@/contexts/ApiContextDefinition';
@@ -14,7 +14,7 @@ export function renderWithProviders(
   {
     apiClient,
     ...renderOptions
-  }: RenderOptions & { apiClient?: Api } = {}
+  }: RenderOptions & { apiClient?: Api<unknown> } = {}
 ) {
   // Create a mock API client if not provided
   const mockApiClient = apiClient || new Api({ baseURL: 'http://localhost:3000' });

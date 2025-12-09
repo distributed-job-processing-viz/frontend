@@ -9,7 +9,7 @@ Currently, two official plugins are available:
 
 ## Code Quality with SonarQube
 
-This project uses SonarQube for continuous code quality inspection and security analysis.
+This project uses SonarQube for continuous code quality inspection and security analysis!
 
 ### Prerequisites
 
