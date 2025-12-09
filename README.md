@@ -14,6 +14,7 @@ This project uses SonarQube for continuous code quality inspection and security 
 ### Prerequisites
 
 1. **SonarQube Server**: Ensure SonarQube is running locally at `http://localhost:9000`
+
    - Download from [SonarQube Downloads](https://www.sonarsource.com/products/sonarqube/downloads/)
    - Or run with Docker: `docker run -d --name sonarqube -p 9000:9000 sonarqube:latest`
 
@@ -33,7 +34,6 @@ npm run sonar
 
 This command will:
 
-
 - Scan all source files in the `src/` directory
 - Exclude `node_modules`, `dist`, and `build` directories
 - Upload analysis results to your local SonarQube instance
@@ -42,7 +42,6 @@ This command will:
 ### Viewing Results
 
 After running the analysis:
-
 
 1. Navigate to `http://localhost:9000` in your browser
 2. Log in to SonarQube (default credentials: admin/admin)
@@ -64,7 +63,6 @@ After running the analysis:
 
 The SonarQube configuration is defined in [sonar-project.properties](sonar-project.properties):
 
-
 - Project key: `frontend`
 - Source directory: `src/`
 - Host URL: `http://localhost:9000`
@@ -79,9 +77,9 @@ If you are developing a production application, we recommend updating the config
 
 ```js
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(["dist"]),
   {
-    files: ['**/*.{ts,tsx}'],
+    files: ["**/*.{ts,tsx}"],
     extends: [
       // Other configs...
 
@@ -96,40 +94,40 @@ export default defineConfig([
     ],
     languageOptions: {
       parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
         tsconfigRootDir: import.meta.dirname,
       },
       // other options...
     },
   },
-])
+]);
 ```
 
 You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
 ```js
 // eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+import reactX from "eslint-plugin-react-x";
+import reactDom from "eslint-plugin-react-dom";
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(["dist"]),
   {
-    files: ['**/*.{ts,tsx}'],
+    files: ["**/*.{ts,tsx}"],
     extends: [
       // Other configs...
       // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
+      reactX.configs["recommended-typescript"],
       // Enable lint rules for React DOM
       reactDom.configs.recommended,
     ],
     languageOptions: {
       parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
         tsconfigRootDir: import.meta.dirname,
       },
       // other options...
     },
   },
-])
+]);
 ```
