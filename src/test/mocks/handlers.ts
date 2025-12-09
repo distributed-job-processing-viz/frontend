@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import type { TaskResponseDTO, WorkerResponseDTO, EngineStatusResponseDTO } from '@/api/Api';
+import type { TaskResponseDTO, WorkerResponseDTO, EngineStatusResponse } from '@/api/Api';
 
 const BASE_URL = 'http://localhost:3000';
 
@@ -23,7 +23,6 @@ const mockTasks: TaskResponseDTO[] = [
     complexity: 'MEDIUM',
     status: 'PROCESSING',
     createdAt: new Date().toISOString(),
-    startedAt: new Date().toISOString(),
   },
   {
     id: 3,
@@ -31,29 +30,26 @@ const mockTasks: TaskResponseDTO[] = [
     complexity: 'HIGH',
     status: 'COMPLETED',
     createdAt: new Date().toISOString(),
-    startedAt: new Date(Date.now() - 60000).toISOString(),
     completedAt: new Date().toISOString(),
   },
 ];
 
 const mockWorkers: WorkerResponseDTO[] = [
   {
-    id: 'worker-1',
+    id: 1,
     name: 'Worker 1',
     status: 'IDLE',
   },
   {
-    id: 'worker-2',
+    id: 2,
     name: 'Worker 2',
     status: 'PROCESSING',
-    currentTaskId: 2,
   },
 ];
 
-const mockEngineStatus: EngineStatusResponseDTO = {
-  status: 'RUNNING',
-  totalTasksProcessed: 42,
-  currentLoad: 2,
+const mockEngineStatus: EngineStatusResponse = {
+  state: 'RUNNING',
+  message: 'Engine is running',
 };
 
 export const handlers = [
@@ -65,7 +61,7 @@ export const handlers = [
   http.post(`${BASE_URL}/api/tasks`, async ({ request }) => {
     const body = await request.json() as { name: string; complexity: string };
     const newTask: TaskResponseDTO = {
-      id: Date.now(),
+      id: Math.floor(Date.now() / 1000),
       name: body.name,
       complexity: body.complexity as 'LOW' | 'MEDIUM' | 'HIGH',
       status: 'PENDING',
@@ -80,9 +76,10 @@ export const handlers = [
   }),
 
   http.post(`${BASE_URL}/api/workers`, () => {
+    const workerId = Math.floor(Date.now() / 1000);
     const newWorker: WorkerResponseDTO = {
-      id: `worker-${Date.now()}`,
-      name: `Worker ${Date.now()}`,
+      id: workerId,
+      name: `Worker ${workerId}`,
       status: 'IDLE',
     };
     return HttpResponse.json(newWorker, { status: 201 });
